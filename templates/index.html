@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-0 fw-semibold">Dashboard</h4>
+    {% if data.month %}
+      <small class="text-muted">Budget Period: {{ data.month }}</small>
+    {% endif %}
+  </div>
+  <!-- Reset Button -->
+  <form method="POST" onsubmit="return confirm('Reset ALL data? This cannot be undone.');">
+    <input type="hidden" name="action" value="reset"/>
+    <button type="submit" class="btn btn-sm btn-outline-danger">
+      <i class="bi bi-arrow-counterclockwise me-1"></i>Reset All
+    </button>
+  </form>
+</div>
+
+<!-- ── Summary Cards ── -->
+{% include "partials/summary_cards.html" %}
+
+<div class="row g-4">
+
+  <!-- LEFT COLUMN: Salary + Add Expense -->
+  <div class="col-lg-4">
+
+    <!-- Salary Card -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-cash me-2 text-primary"></i>Set Monthly Salary
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <input type="hidden" name="action" value="set_salary"/>
+          <div class="mb-3">
+            <label class="form-label">Monthly Salary (₱)</label>
+            <input type="number" name="salary" class="form-control" placeholder="e.g. 25000"
+              value="{{ data.salary or '' }}" min="0" step="0.01" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Budget Month (optional)</label>
+            <input type="month" name="month" class="form-control"
+              value="{{ data.month or '' }}"/>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-save me-1"></i>Save Salary
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Expense Card -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-plus-circle me-2 text-success"></i>Add Expense
+      </div>
+      <div class="card-body">
+        {% if not data.salary %}
+          <div class="alert alert-warning py-2 small">
+            <i class="bi bi-exclamation-triangle me-1"></i>Please set your salary first.
+          </div>
+        {% endif %}
+        <form method="POST">
+          <input type="hidden" name="action" value="add_expense"/>
+          <div class="mb-3">
+            <label class="form-label">Expense Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Electricity bill" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Amount (₱)</label>
+            <input type="number" name="amount" class="form-control" placeholder="0.00"
+              min="0.01" step="0.01" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select" required>
+              <option value="" disabled selected>Select category</option>
+              {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Note (optional)</label>
+            <input type="text" name="note" class="form-control" placeholder="Short note..."/>
+          </div>
+          <button type="submit" class="btn btn-success w-100" {% if not data.salary %}disabled{% endif %}>
+            <i class="bi bi-plus me-1"></i>Add Expense
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div><!-- /LEFT COLUMN -->
+
+  <!-- RIGHT COLUMN: Expense list + Allocation -->
+  <div class="col-lg-8">
+
+    <!-- Filters + Expense Table -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span class="fw-semibold"><i class="bi bi-list-ul me-2 text-secondary"></i>Expenses</span>
+
+        <!-- Filter form -->
+        <form method="GET" class="d-flex flex-wrap gap-2 align-items-center">
+          <select name="category" class="form-select form-select-sm" style="width:auto;">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+              <option value="{{ cat }}" {% if filter_cat == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+          <input type="date" name="date" class="form-control form-control-sm" style="width:auto;"
+            value="{{ filter_date }}"/>
+          <button type="submit" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-funnel"></i> Filter
+          </button>
+          {% if filter_cat or filter_date %}
+            <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-x"></i> Clear
+            </a>
+          {% endif %}
+        </form>
+      </div>
+      <div class="card-body p-0">
+        {% include "partials/expense_table.html" %}
+      </div>
+    </div>
+
+    <!-- Budget Allocation -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-pie-chart me-2 text-info"></i>Recommended vs Actual Allocation
+      </div>
+      <div class="card-body">
+        {% include "partials/allocation_table.html" %}
+      </div>
+    </div>
+
+  </div><!-- /RIGHT COLUMN -->
+
+</div><!-- /row -->
+
+<!-- ── Edit Expense Modal ── -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST">
+        <input type="hidden" name="action"  value="edit_expense"/>
+        <input type="hidden" name="exp_id"  id="edit_id"/>
+
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit Expense</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Expense Name</label>
+            <input type="text" name="name" id="edit_name" class="form-control" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Amount (₱)</label>
+            <input type="number" name="amount" id="edit_amount" class="form-control"
+              min="0.01" step="0.01" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select name="category" id="edit_category" class="form-select" required>
+              {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" id="edit_date" class="form-control" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Note (optional)</label>
+            <input type="text" name="note" id="edit_note" class="form-control"/>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

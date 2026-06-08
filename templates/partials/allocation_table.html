@@ -1,0 +1,47 @@
+<!-- ── Budget Allocation Table ── -->
+{% if summary.salary %}
+<div class="table-responsive">
+  <table class="table table-sm align-middle mb-0">
+    <thead class="table-light">
+      <tr>
+        <th>Category</th>
+        <th class="text-end">Recommended</th>
+        <th class="text-end">Actual</th>
+        <th>Usage</th>
+        <th class="text-end">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in summary.allocation %}
+      <tr>
+        <td>{{ item.category }} <span class="text-muted small">({{ item.pct }}%)</span></td>
+        <td class="text-end text-muted small">₱{{ "{:,.2f}".format(item.recommended) }}</td>
+        <td class="text-end fw-semibold {% if item.over %}text-danger{% else %}text-success{% endif %}">
+          ₱{{ "{:,.2f}".format(item.actual) }}
+        </td>
+        <td style="min-width:120px;">
+          {% if item.recommended > 0 %}
+            {% set bar_pct = [(item.actual / item.recommended * 100), 100]|min %}
+            <div class="progress" style="height:8px;">
+              <div class="progress-bar {% if item.over %}bg-danger{% elif bar_pct > 80 %}bg-warning{% else %}bg-success{% endif %}"
+                style="width:{{ bar_pct }}%"></div>
+            </div>
+          {% endif %}
+        </td>
+        <td class="text-end">
+          {% if item.over %}
+            <span class="badge bg-danger">Over</span>
+          {% elif item.actual == 0 %}
+            <span class="badge bg-light text-muted border">None</span>
+          {% else %}
+            <span class="badge bg-success">OK</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-muted text-center py-3">Set your salary to see budget allocation.</p>
+{% endif %}

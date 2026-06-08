@@ -1,0 +1,38 @@
+{
+  "salary": 50000.0,
+  "month": "2026-06",
+  "expenses": [
+    {
+      "id": "1780652166269",
+      "name": "Electricity Bill",
+      "amount": 1500.0,
+      "category": "Bills",
+      "date": "2026-06-05",
+      "note": "overdue"
+    },
+    {
+      "id": "1780652232876",
+      "name": "SNACKS",
+      "amount": 1000.0,
+      "category": "Groceries",
+      "date": "2026-06-02",
+      "note": "DESERVE KO TO!"
+    },
+    {
+      "id": "1780652320023",
+      "name": "Bags",
+      "amount": 12000.0,
+      "category": "Entertainment",
+      "date": "2026-06-04",
+      "note": "DESERVE KO TO!"
+    },
+    {
+      "id": "1780799558249",
+      "name": "SNACKS",
+      "amount": 50000.0,
+      "category": "Groceries",
+      "date": "2026-06-06",
+      "note": ""
+    }
+  ]
+}

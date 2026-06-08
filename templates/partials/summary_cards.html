@@ -1,0 +1,68 @@
+<!-- ── Summary Cards ── -->
+<div class="row g-3 mb-4">
+
+  <!-- Total Salary -->
+  <div class="col-6 col-md-3">
+    <div class="card card-summary h-100">
+      <div class="card-body">
+        <div class="summary-icon text-primary"><i class="bi bi-cash-coin"></i></div>
+        <div class="summary-label">Monthly Salary</div>
+        {% if summary.salary %}
+          <div class="summary-value">₱{{ "{:,.2f}".format(summary.salary) }}</div>
+        {% else %}
+          <div class="summary-value text-muted">—</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Spent -->
+  <div class="col-6 col-md-3">
+    <div class="card card-summary h-100">
+      <div class="card-body">
+        <div class="summary-icon text-danger"><i class="bi bi-arrow-up-circle"></i></div>
+        <div class="summary-label">Total Spent</div>
+        <div class="summary-value text-danger">₱{{ "{:,.2f}".format(summary.total_spent) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remaining -->
+  <div class="col-6 col-md-3">
+    <div class="card card-summary h-100">
+      <div class="card-body">
+        <div class="summary-icon {% if summary.remaining >= 0 %}text-success{% else %}text-danger{% endif %}">
+          <i class="bi bi-piggy-bank"></i>
+        </div>
+        <div class="summary-label">Remaining</div>
+        <div class="summary-value {% if summary.remaining >= 0 %}text-success{% else %}text-danger{% endif %}">
+          ₱{{ "{:,.2f}".format(summary.remaining) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- % Used -->
+  <div class="col-6 col-md-3">
+    <div class="card card-summary h-100">
+      <div class="card-body">
+        <div class="summary-icon text-warning"><i class="bi bi-speedometer2"></i></div>
+        <div class="summary-label">Salary Used</div>
+        <div class="summary-value {% if summary.pct_used > 100 %}text-danger{% elif summary.pct_used > 80 %}text-warning{% else %}text-success{% endif %}">
+          {{ summary.pct_used }}%
+        </div>
+        {% if summary.salary %}
+          <div class="progress mt-2" style="height:6px;">
+            <div class="progress-bar
+              {% if summary.pct_used > 100 %}bg-danger
+              {% elif summary.pct_used > 80 %}bg-warning
+              {% else %}bg-success{% endif %}"
+              style="width: {{ [summary.pct_used, 100]|min }}%">
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>

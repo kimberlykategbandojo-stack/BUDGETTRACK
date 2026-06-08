@@ -1,0 +1,61 @@
+<!-- ── Expense Table ── -->
+{% if expenses %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light">
+      <tr>
+        <th>Date</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th class="text-end">Amount</th>
+        <th>Note</th>
+        <th class="text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for exp in expenses %}
+      <tr>
+        <td class="text-nowrap text-muted small">{{ exp.date }}</td>
+        <td class="fw-medium">{{ exp.name }}</td>
+        <td>
+          <span class="badge bg-secondary category-badge">{{ exp.category }}</span>
+        </td>
+        <td class="text-end fw-semibold text-danger">₱{{ "{:,.2f}".format(exp.amount) }}</td>
+        <td class="text-muted small">{{ exp.note or "—" }}</td>
+        <td class="text-center text-nowrap">
+
+          <!-- Edit Button -->
+          <button type="button" class="btn btn-sm btn-outline-primary me-1"
+            data-bs-toggle="modal" data-bs-target="#editModal"
+            data-id="{{ exp.id }}"
+            data-name="{{ exp.name }}"
+            data-amount="{{ exp.amount }}"
+            data-category="{{ exp.category }}"
+            data-date="{{ exp.date }}"
+            data-note="{{ exp.note }}">
+            <i class="bi bi-pencil"></i>
+          </button>
+
+          <!-- Delete Button -->
+          <form method="POST" action="{{ url_for('index') }}" class="d-inline"
+            onsubmit="return confirm('Delete this expense?');">
+            <input type="hidden" name="action"  value="delete_expense"/>
+            <input type="hidden" name="exp_id"  value="{{ exp.id }}"/>
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i>
+            </button>
+          </form>
+
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<!-- Empty state -->
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-inbox display-4 d-block mb-2"></i>
+  <p class="mb-0">No expenses found. Add one using the form above.</p>
+</div>
+{% endif %}
